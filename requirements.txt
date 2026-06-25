@@ -1,0 +1,9 @@
+# OCR-Scanner
+# =============
+pytesseract
+requests
+google-genai
+pydantic
+python-dotenv
+Pillow
+# =============
