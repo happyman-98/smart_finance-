@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 import pytesseract
 import requests  
@@ -57,7 +55,7 @@ _PROMPT = (
 
 class TesseractEngine:
     name = "tesseract"
-
+    
     def extract(self, image_path: str) -> Extraction:
 
         img = ImageOps.grayscale(Image.open(image_path))
@@ -123,7 +121,6 @@ class GeminiEngine:
 
     def extract(self, image_path: str) -> Extraction:
         
-
         media_type = mimetypes.guess_type(image_path)[0] or "image/jpeg"
         with open(image_path, "rb") as f:
             img_bytes = f.read()
@@ -169,10 +166,10 @@ def decide(ex: Extraction) -> str:
 
 
 ENGINES = {
-    "tesseract": TesseractEngine,
-    "ollama": OllamaVisionEngine,
-    "gemini": GeminiEngine,
-    "vision": VisionLLMEngine,
+    "tesseract": TesseractEngine, ## uses PYthon libaray no api
+    "ollama": OllamaVisionEngine, ## local run
+    "gemini": GeminiEngine, ## API gemini
+    "vision": VisionLLMEngine, ## better than gemini API
 }
 
 if __name__ == "__main__":
@@ -187,3 +184,4 @@ if __name__ == "__main__":
     ex = engine.extract(path)
     print(ex.model_dump_json(indent=2))
     print("decision:", decide(ex), "| tax_total:", ex.tax_total())
+
