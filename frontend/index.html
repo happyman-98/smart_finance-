@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceOS | Premium Smart Spend Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
+        <defs>
+        <linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+            <stop offset='0%25' stop-color='%2300FFC2'/>
+            <stop offset='100%25' stop-color='%2300B896'/>
+        </linearGradient>
+        </defs>
+        <circle cx='16' cy='16' r='16' fill='url(%23g)'/>
+        <text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle'
+        font-size='22' font-weight='bold' fill='%23000000'>∞</text>
+    </svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #0B0C10;
+            color: #F3F4F6;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR PANEL NAVIGATION --- */
+        .sidebar {
+            width: 260px;
+            background: #11141A;
+            border-right: 1px solid #1E2330;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 35px;
+            padding-left: 10px;
+        }
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #00FFC2 0%, #00B896 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #8F9CAE);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+        .menu-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #4E5D78;
+            margin: 15px 0 8px 12px;
+            font-weight: 700;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: #8F9CAE;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            transition: color 0.2s;
+        }
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+        }
+        .nav-item.active {
+            background: #1E2330;
+            color: #00FFC2;
+            font-weight: 600;
+        }
+        .nav-item.active i {
+            color: #00FFC2;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid #1E2330;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* --- CONTAINER SLOTS --- */
+        .app-workspace {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at top right, #161B26 0%, #0B0C10 60%);
+        }
+
+        /* --- GLOBAL APPLICATION HEADER --- */
+        .app-header {
+            height: 80px;
+            border-bottom: 1px solid #1E2330;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+        .view-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .live-clock {
+            font-size: 0.9rem;
+            color: #8F9CAE;
+            background: #11141A;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #1E2330;
+        }
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #11141A;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #1E2330;
+        }
+        .user-pill img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #00FFC2;
+        }
+
+        /* --- SPA VIEW ROUTER WRAPPERS --- */
+        .view-frame {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: none; /* Controlled via state logic engine */
+        }
+        .view-frame.active-view {
+            display: block;
+            animation: fadeIn 0.35s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- INTERACTIVE GRID COMPONENTS --- */
+        .metrics-shelf {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: #11141A;
+            border: 1px solid #1E2330;
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: transparent;
+        }
+        .metric-card.accent-mint::before { background: #00FFC2; }
+        .metric-card.accent-purple::before { background: #635BFF; }
+        .metric-card.accent-rose::before { background: #FF4A6B; }
+
+        .metric-label { font-size: 0.85rem; color: #8F9CAE; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 2rem; font-weight: 700; margin-top: 8px; letter-spacing: -0.5px; }
+        .metric-sub { font-size: 0.8rem; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+        .trend-up { color: #00FFC2; }
+        .trend-down { color: #FF4A6B; }
+
+        .dashboard-layout-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 24px;
+        }
+        .card-panel {
+            background: #11141A;
+            border: 1px solid #1E2330;
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .panel-title { font-size: 1.1rem; font-weight: 600; }
+
+        /* Chart Canvas Size Restraints */
+        .chart-box { position: relative; height: 260px; width: 100%; }
+
+        /* Data Lists Elements styling */
+        .data-feed { display: flex; flex-direction: column; gap: 12px; }
+        .feed-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #161B26;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid #222938;
+        }
+        .row-meta { display: flex; align-items: center; gap: 14px; }
+        .row-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .bg-mint-dim { background: rgba(0, 255, 194, 0.1); color: #00FFC2; }
+        .bg-rose-dim { background: rgba(255, 74, 107, 0.1); color: #FF4A6B; }
+        
+        .row-title { font-size: 0.95rem; font-weight: 600; }
+        .row-sub { font-size: 0.75rem; color: #8F9CAE; margin-top: 2px; }
+        .row-amt { font-weight: 700; font-size: 1rem; }
+
+        /* Form styling inputs */
+        .interactive-form-box {
+            background: #161B26; padding: 20px; border-radius: 12px; border: 1px solid #222938; margin-top: 20px;
+        }
+        .input-element {
+            width: 100%; padding: 12px; background: #0B0C10; border: 1px solid #1E2330;
+            border-radius: 8px; color: #fff; font-size: 0.95rem; margin-top: 8px; margin-bottom: 16px;
+        }
+        .action-submit-btn {
+            background: #00FFC2; color: #000; border: none; padding: 12px 24px;
+            border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+        }
+        .action-submit-btn:hover { opacity: 0.9; }
+
+        /* Notification Widget styles */
+        .toast-banner {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: #635BFF; color: white; padding: 14px 28px; border-radius: 30px;
+            font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-banner.visible { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="brand-wrapper">
+                <div class="brand-logo"><i class="fa-solid fa-infinity"></i></div>
+                <div class="brand-text">FinanceOS</div>
+            </div>
+
+            <nav class="nav-group">
+                <div class="menu-label">Main Scope</div>
+                <div class="nav-item active" data-target="overview-view"><i class="fa-solid fa-chart-pie"></i>Overview</div>
+                <div class="nav-item" data-target="accounts-view"><i class="fa-solid fa-wallet"></i>My Accounts</div>
+                <div class="nav-item" data-target="transactions-view"><i class="fa-solid fa-receipt"></i>Transactions</div>
+                <div class="nav-item" data-target="categories-view"><i class="fa-solid fa-tags"></i>Categories</div>
+                <div class="nav-item" data-target="goals-view"><i class="fa-solid fa-bullseye"></i>Goals Tracker</div>
+            </nav>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="nav-item" data-target="settings-view"><i class="fa-solid fa-sliders"></i>Settings</div>
+            <div class="nav-item" id="logout-trigger" style="color: #FF4A6B;"><i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out</div>
+        </div>
+    </aside>
+
+    <main class="app-workspace">
+        
+        <header class="app-header">
+            <div class="view-title" id="dynamic-title">Dashboard Overview</div>
+            <div class="header-actions">
+                <div class="live-clock" id="clock-display">00:00:00 AM</div>
+                <div class="user-pill">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><circle cx='12' cy='8' r='4'/><path d='M12 14c-6.1 0-8 4-8 4v2h16v-2s-1.9-4-8-4z'/></svg>" alt="User Profile">
+                    <span style="font-size: 0.85rem; font-weight: 500;">Murad H.</span>
+                </div>
+            </div>
+        </header>
+
+        <section id="overview-view" class="view-frame active-view">
+            <div class="metrics-shelf">
+                <div class="metric-card accent-mint">
+                    <div class="metric-label">Net Available Balance</div>
+                    <div class="metric-value" id="live-net-balance">$23,562.00</div>
+                    <div class="metric-sub trend-up"><i class="fa-solid fa-caret-up"></i> +10.5% from last month</div>
+                </div>
+                <div class="metric-card accent-purple">
+                    <div class="metric-label">Monthly Incomes</div>
+                    <div class="metric-value">$40,296.00</div>
+                    <div class="metric-sub trend-up"><i class="fa-solid fa-caret-up"></i> +4.2% trajectory</div>
+                </div>
+                <div class="metric-card accent-rose">
+                    <div class="metric-label">Allocated Expenses</div>
+                    <div class="metric-value">$16,734.00</div>
+                    <div class="metric-sub trend-down"><i class="fa-solid fa-caret-down"></i> 2.1% internal reduction</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout-grid">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Budget & Spending Flow</div>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="overviewFlowChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Quick Action Pipeline</div>
+                    </div>
+                    <p style="font-size: 0.85rem; color:#8F9CAE; line-height:1.4;">Fire global asynchronous testing functions inside your active state workspace via the dashboard links.</p>
+                    <div class="interactive-form-box">
+                        <label style="font-size:0.8rem; font-weight:600; color:#00FFC2;">Simulate Deposit Inflow</label>
+                        <input type="number" id="deposit-input-amount" class="input-element" placeholder="Enter amount ($)">
+                        <button class="action-submit-btn" id="simulate-deposit-btn">Process Deposit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="chat-widget-trigger" id="chatbot-button">
+    <div class="chat-alert-bubble">Talk with SmartAssist</div>
+    <div class="chat-bot-icon">
+        <i class="fa-solid fa-robot"></i>
+    </div>
+</div>
+
+<div class="chat-window-box" id="chatbot-window">
+    <div class="chat-window-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="chat-status-avatar">
+                <i class="fa-solid fa-robot"></i>
+                <span class="status-indicator-dot"></span>
+            </div>
+            <div>
+                <h4 style="margin: 0; font-size: 0.95rem;">SmartAssist AI</h4>
+                <span style="font-size: 0.75rem; color: #00FFC2;">Online & Ready</span>
+            </div>
+        </div>
+        <button class="chat-close-btn" id="close-chatbot">&times;</button>
+    </div>
+    
+    <div class="chat-messages-body" id="chat-messages-container">
+        <div class="msg-bubble bot-msg">
+            Hello! I am your SmartSpend assistant. Try asking me: 
+            <br>• <strong>"What is my balance?"</strong>
+            <br>• <strong>"Give me a budget tip"</strong>
+        </div>
+    </div>
+    
+    <div class="chat-input-area">
+        <input type="text" id="chat-user-input" placeholder="Type a message or financial question...">
+        <button id="chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
+
+        <section id="accounts-view" class="view-frame">
+            <div class="card-panel" style="margin-bottom: 24px;">
+                <h3>Connected Banking Operations</h3>
+                <p style="color: #8F9CAE; margin-top: 4px; font-size: 0.9rem;">Manage live financial access keys.</p>
+            </div>
+            <div class="data-feed">
+                <div class="feed-row">
+                    <div class="row-meta">
+                        <div class="row-icon bg-mint-dim"><i class="fa-solid fa-building-columns"></i></div>
+                        <div>
+                            <div class="row-title">Primary Liquidity Checking</div>
+                            <div class="row-sub">Chase Bank Corp •••• 9821</div>
+                        </div>
+                    </div>
+                    <div class="row-amt">$18,450.00</div>
+                </div>
+                <div class="feed-row">
+                    <div class="row-meta">
+                        <div class="row-icon bg-mint-dim"><i class="fa-solid fa-vault"></i></div>
+                        <div>
+                            <div class="row-title">High Yield Investment Asset Vault</div>
+                            <div class="row-sub">Goldman Sachs Ledger •••• 4412</div>
+                        </div>
+                    </div>
+                    <div class="row-amt">$5,112.00</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="transactions-view" class="view-frame">
+            <div class="panel-header">
+                <h3>Historical Ledger Inflow/Outflow</h3>
+            </div>
+            <div class="data-feed" id="master-transaction-ledger">
+                <div class="feed-row">
+                    <div class="row-meta">
+                        <div class="row-icon bg-mint-dim"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div>
+                            <div class="row-title">Payroll Check Settlement</div>
+                            <div class="row-sub">June 26, 2026 • Direct Deposit Account</div>
+                        </div>
+                    </div>
+                    <div class="row-amt trend-up">+$4,500.00</div>
+                </div>
+                <div class="feed-row">
+                    <div class="row-meta">
+                        <div class="row-icon bg-rose-dim"><i class="fa-solid fa-bolt"></i></div>
+                        <div>
+                            <div class="row-title">AWS Server Cloud Deployment Billing</div>
+                            <div class="row-sub">June 24, 2026 • Automated Corporate Card</div>
+                        </div>
+                    </div>
+                    <div class="row-amt trend-down">-$312.40</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="categories-view" class="view-frame">
+            <div class="dashboard-layout-grid">
+                <div class="card-panel">
+                    <h3>Spending Categories Distribution</h3>
+                    <div class="chart-box" style="margin-top:20px;">
+                        <canvas id="categoryDistributionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-panel">
+                    <h3>Sector Configuration</h3>
+                    <p style="color: #8F9CAE; font-size:0.85rem; line-height:1.4; margin-top:10px;">Allocate explicit parameters across processing pipelines.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="goals-view" class="view-frame">
+            <h3>Strategic Capital Target Goals</h3>
+            <div class="interactive-form-box" style="margin-top:20px;">
+                <h4 style="margin-bottom:10px;">Real Estate Deposit Reserve Fund</h4>
+                <div style="background: #0B0C10; padding:4px; border-radius:20px; border:1px solid #1E2330; position:relative;">
+                    <div style="background: linear-gradient(90deg, #635BFF, #00FFC2); height:16px; border-radius:20px; width: 72%;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-top:8px; color:#8F9CAE;">
+                    <span>Current Tier: $72,000.00</span>
+                    <span style="color:#00FFC2;">Target Goal: $100,000.00 (72%)</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="settings-view" class="view-frame">
+            <h3>System Control Preferences</h3>
+            <div class="card-panel" style="margin-top:20px;">
+                <p style="font-size:0.95rem; margin-bottom:15px;"><i class="fa-solid fa-shield-halved" style="color:#00FFC2; margin-right:8px;"></i> Two-Factor Security Handshake: <span style="color:#00FFC2; font-weight:700;">ACTIVE</span></p>
+                <p style="font-size:0.95rem;"><i class="fa-solid fa-server" style="color:#635BFF; margin-right:8px;"></i> API Gateway Relay Endpoint: <span style="color:#8F9CAE;">https://api.financeos.internal/v1</span></p>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="toast-banner" id="global-toast-widget">Action initialized successfully.</div>
+
+    <script>
+        // --- 1. DYNAMIC STATE VARIABLES ---
+        let currentNetValue = 23562.00;
+
+        // --- 2. LIVE CLOCK CONTROLLER ---
+        function updateSystemClock() {
+            const clockEl = document.getElementById('clock-display');
+            const now = new Date();
+            clockEl.innerText = now.toLocaleTimeString('en-US', { hour12: true });
+        }
+        setInterval(updateSystemClock, 1000);
+        updateSystemClock();
+
+        // --- 3. TOAST NOTIFICATION UTILITY SYSTEM ---
+        const toastElement = document.getElementById('global-toast-widget');
+        function triggerToastFeedback(messageText) {
+            toastElement.innerText = messageText;
+            toastElement.classList.add('visible');
+            setTimeout(() => {
+                toastElement.classList.remove('visible');
+            }, 3000);
+        }
+
+        // --- 4. ENGINE ROUTER: SPA SINGLE-PAGE VIEW NAVIGATION MULTIPLEXER ---
+        const navigationButtons = document.querySelectorAll('.nav-item');
+        const contentViews = document.querySelectorAll('.view-frame');
+        const headerTitleText = document.getElementById('dynamic-title');
+
+        navigationButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const viewTargetId = button.getAttribute('data-target');
+                
+                if (!viewTargetId) return; // Prevent breakages on layout containers lacking pointers
+
+                // Cycle Active states out of navigation layout trees
+                navigationButtons.forEach(btn => btn.classList.remove('active'));
+                contentViews.forEach(view => view.classList.remove('active-view'));
+
+                // Bind updated state anchors
+                button.classList.add('active');
+                const targetViewDOM = document.getElementById(viewTargetId);
+                targetViewDOM.classList.add('active-view');
+
+                // Adjust central header context text dynamically
+                headerTitleText.innerText = button.textContent.trim();
+                triggerToastFeedback(`Mapsd to ${button.textContent.trim()}`);
+            });
+        });
+
+        // --- 5. LOGOUT CONTROL ACTION HANDLER ---
+        document.getElementById('logout-trigger').addEventListener('click', () => {
+            alert("Secure session termination requested. Redirecting to initialization access portal...");
+            window.location.reload();
+        });
+
+        // --- 6. INTERACTIVE APPLICATION FEATURES (DEPOSIT SIMULATION) ---
+        const depositInput = document.getElementById('deposit-input-amount');
+        const processDepositBtn = document.getElementById('simulate-deposit-btn');
+        const liveBalanceDisplay = document.getElementById('live-net-balance');
+        const historicalLedger = document.getElementById('master-transaction-ledger');
+
+        processDepositBtn.addEventListener('click', () => {
+            const parsedAmount = parseFloat(depositInput.value);
+            if (isNaN(parsedAmount) || parsedAmount <= 0) {
+                alert("Validation processing error. Input explicit absolute positive values.");
+                return;
+            }
+
+            // Modify active numeric values inside state
+            currentNetValue += parsedAmount;
+            liveBalanceDisplay.innerText = `$${currentNetValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Build structural entry objects dynamically into HTML Ledgers
+            const newRow = document.createElement('div');
+            newRow.className = 'feed-row';
+            newRow.innerHTML = `
+                <div class="row-meta">
+                    <div class="row-icon bg-mint-dim"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                    <div>
+                        <div class="row-title">Manual System Deposit Pipeline</div>
+                        <div class="row-sub">Just Now • Instant Settlement Account</div>
+                    </div>
+                </div>
+                <div class="row-amt trend-up">+$${parsedAmount.toFixed(2)}</div>
+            `;
+            // Prepend element right to the peak index of ledger lists
+            historicalLedger.insertBefore(newRow, historicalLedger.firstChild);
+
+            triggerToastFeedback(`Asset cleared: +$${parsedAmount.toFixed(2)} compiled safely.`);
+            depositInput.value = ''; // Clean input element state values
+        });
+
+        // --- 7. DATA RENDERING ENGINES: CHART.JS GRAPH IMPLEMENTATIONS ---
+        // Setup Card 1 Analytics Line Graph Canvas Content
+        const primaryCtx = document.getElementById('overviewFlowChart').getContext('2d');
+        new Chart(primaryCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Budget Allocated ($)',
+                    data: [18000, 15000, 22000, 29000, 21000, 33989, 28000, 24000, 29000, 19000, 22000, 31000],
+                    backgroundColor: '#1E2330',
+                    borderRadius: 6
+                }, {
+                    label: 'Actual Spend ($)',
+                    data: [12000, 19000, 14000, 21000, 19000, 27566, 21000, 18000, 22000, 15000, 17000, 24000],
+                    backgroundColor: '#00FFC2',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8F9CAE' } } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#8F9CAE' } },
+                    y: { grid: { color: '#1E2330' }, ticks: { color: '#8F9CAE' } }
+                }
+            }
+        });
+
+        // Setup Card 2 Analytics Category Distribution Graph Canvas Content
+        const categoryCtx = document.getElementById('categoryDistributionChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Dining/Leisure', 'Logistics', 'Groceries', 'Utilities', 'Investments'],
+                datasets: [{
+                    data: [2500, 4100, 6100, 10100, 17496],
+                    backgroundColor: ['#FF4A6B', '#635BFF', '#00FFC2', '#FFB800', '#00B896'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { color: '#8F9CAE' } } }
+            }
+        });
+    </script>
+</body>
+</html>
