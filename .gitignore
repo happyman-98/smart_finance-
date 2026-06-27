@@ -58,5 +58,3 @@ htmlcov/
 tmp/
 temp/
 
-bot.py
-cli.py
