@@ -684,20 +684,25 @@ async function handleOCRFile(file) {
         if (!dateVal)  missingFields.push("date");
 
         // ── CHANGE 3: Pass allowRetry=true for error/low-confidence states ──
+        // Tesseract runs offline and naturally reports lower confidence, so we
+        // skip the low-confidence warnings for it — only a true scan failure shows.
+        const engineUsed  = String(data.engine ?? engine).toLowerCase();
+        const isTesseract = engineUsed.includes("tesseract");
+
         if (confidence === 0 || (!merchant && !amount)) {
             showOCRAlert("error",
                 `<strong>Scan failed.</strong> No data could be extracted from this image. ` +
                 `Try a clearer photo or better lighting. You can also fill in the fields manually below.`,
                 true  // show retry
             );
-        } else if (confidence < 0.5) {
+        } else if (!isTesseract && confidence < 0.5) {
             showOCRAlert("error",
                 `<strong>Very low confidence (${confPct}%).</strong> The receipt was hard to read — ` +
                 `${missingFields.length ? `fields missing: <strong>${missingFields.join(", ")}</strong>. ` : ""}` +
                 `Review every field carefully or upload a clearer image.`,
                 true  // show retry
             );
-        } else if (confidence < 0.85) {
+        } else if (!isTesseract && confidence < 0.85) {
             showOCRAlert("warning",
                 `<strong>Low confidence (${confPct}%).</strong> Some fields may be wrong. ` +
                 `${missingFields.length ? `Missing: <strong>${missingFields.join(", ")}</strong>. ` : ""}` +
