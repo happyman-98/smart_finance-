@@ -1,6 +1,8 @@
 <div align="center">
 
-# 💸 FinanceOS
+<img src="assets/logo.png" alt="FinanceOS logo" width="96" height="96" />
+
+# FinanceOS
 
 ### Your money, on autopilot — scan receipts, track every rupee, and ask an AI that *actually knows your numbers*.
 
