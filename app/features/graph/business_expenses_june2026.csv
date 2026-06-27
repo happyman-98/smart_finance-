@@ -1,0 +1,46 @@
+Expense_ID,Date,Category,Type,Description,Vendor,Payment_Method,Amount_USD
+EXP-0001,2026-06-01,Internet,Fixed,Fiber + backup line,Vendor-206,Bank Transfer,313.91
+EXP-0002,2026-06-01,Rent,Fixed,Office lease - June,Skyline Properties,Bank Transfer,4500.0
+EXP-0003,2026-06-01,Software,SaaS,Cloud & tooling subscriptions,Vendor-566,Card,432.33
+EXP-0004,2026-06-02,Supplies,Variable,Office supplies,Vendor-971,Bank Transfer,140.07
+EXP-0005,2026-06-02,Marketing,Variable,Ad campaigns,Vendor-443,Bank Transfer,676.16
+EXP-0006,2026-06-04,Software,SaaS,Cloud & tooling subscriptions,Vendor-413,Card,764.59
+EXP-0007,2026-06-04,Meals,Variable,Team meals & entertainment,Vendor-158,Card,231.74
+EXP-0008,2026-06-04,Utilities,Fixed,Electricity & water,Vendor-343,Card,446.53
+EXP-0009,2026-06-05,Software,SaaS,Cloud & tooling subscriptions,Vendor-120,Card,757.43
+EXP-0010,2026-06-06,Meals,Variable,Team meals & entertainment,Vendor-341,Card,444.17
+EXP-0011,2026-06-06,Maintenance,Variable,Equipment & repairs,Vendor-439,Card,243.95
+EXP-0012,2026-06-06,Travel,Variable,Client visits,Vendor-875,Card,854.1
+EXP-0013,2026-06-07,Rent,Fixed,Office lease - June,Vendor-971,Bank Transfer,2848.06
+EXP-0014,2026-06-08,Marketing,Variable,Ad campaigns,Vendor-871,Card,880.72
+EXP-0015,2026-06-09,Maintenance,Variable,Equipment & repairs,Vendor-301,Bank Transfer,402.39
+EXP-0016,2026-06-10,Supplies,Variable,Office supplies,Vendor-351,Card,182.68
+EXP-0017,2026-06-11,Software,SaaS,Cloud & tooling subscriptions,Vendor-437,Card,599.85
+EXP-0018,2026-06-11,Supplies,Variable,Office supplies,Vendor-863,Bank Transfer,144.22
+EXP-0019,2026-06-11,Meals,Variable,Team meals & entertainment,Vendor-912,Card,233.33
+EXP-0020,2026-06-12,Meals,Variable,Team meals & entertainment,Vendor-747,Card,383.26
+EXP-0021,2026-06-12,Utilities,Fixed,Electricity & water,Vendor-774,Bank Transfer,621.7
+EXP-0022,2026-06-13,Software,SaaS,Cloud & tooling subscriptions,Vendor-140,Cash,986.94
+EXP-0023,2026-06-13,Meals,Variable,Team meals & entertainment,Vendor-132,Card,336.34
+EXP-0024,2026-06-14,Supplies,Variable,Office supplies,Vendor-783,Bank Transfer,199.87
+EXP-0025,2026-06-14,Utilities,Fixed,Electricity & water,Vendor-712,Cash,495.0
+EXP-0026,2026-06-15,Rent,Fixed,Office lease - June,Vendor-602,Bank Transfer,4723.0
+EXP-0027,2026-06-15,Travel,Variable,Client visits,Vendor-306,Card,392.75
+EXP-0028,2026-06-16,Utilities,Fixed,Electricity & water,Vendor-842,Card,256.97
+EXP-0029,2026-06-18,Internet,Fixed,Fiber + backup line,Vendor-506,Bank Transfer,304.2
+EXP-0030,2026-06-18,Internet,Fixed,Fiber + backup line,Vendor-938,Card,312.14
+EXP-0031,2026-06-18,Marketing,Variable,Ad campaigns,Vendor-781,Bank Transfer,1788.63
+EXP-0032,2026-06-21,Internet,Fixed,Fiber + backup line,Vendor-430,Card,300.83
+EXP-0033,2026-06-22,Meals,Variable,Team meals & entertainment,Vendor-324,Card,240.17
+EXP-0034,2026-06-22,Meals,Variable,Team meals & entertainment,Vendor-844,Card,397.67
+EXP-0035,2026-06-23,Supplies,Variable,Office supplies,Vendor-417,Card,176.14
+EXP-0036,2026-06-24,Maintenance,Variable,Equipment & repairs,Vendor-926,Card,351.93
+EXP-0037,2026-06-24,Supplies,Variable,Office supplies,Vendor-212,Card,206.54
+EXP-0038,2026-06-25,Internet,Fixed,Fiber + backup line,Vendor-906,Card,155.55
+EXP-0039,2026-06-28,Salaries,Payroll,Monthly staff salaries,Internal Payroll,Bank Transfer,28500.0
+EXP-0040,2026-06-29,Rent,Fixed,Office lease - June,Vendor-101,Card,2880.46
+EXP-0041,2026-06-29,Marketing,Variable,Ad campaigns,Vendor-835,Cash,644.62
+EXP-0042,2026-06-29,Utilities,Fixed,Electricity & water,Vendor-152,Card,607.58
+EXP-0043,2026-06-30,Marketing,Variable,Ad campaigns,Vendor-935,Card,926.77
+EXP-0044,2026-06-30,Supplies,Variable,Office supplies,Vendor-866,Bank Transfer,122.77
+EXP-0045,2026-06-30,Software,SaaS,Cloud & tooling subscriptions,Vendor-297,Card,775.26
