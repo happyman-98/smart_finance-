@@ -304,11 +304,19 @@ document.addEventListener("DOMContentLoaded", () => {
 const drawerEl      = document.getElementById("add-tx-drawer");
 const drawerOverlay = document.getElementById("drawer-overlay");
 
+// ── CHANGE 1: Set today's date on manual tab every time drawer opens ──
+function getTodayISO() {
+    return new Date().toISOString().split("T")[0];
+}
+
 function openDrawer() {
     drawerEl.classList.add("open");
     drawerOverlay.classList.add("open");
+    // Auto-fill today's date for manual entry
+    document.getElementById("tx-date").value = getTodayISO();
     document.getElementById("tx-tab-manual").click();
 }
+
 function closeDrawer() {
     drawerEl.classList.remove("open");
     drawerOverlay.classList.remove("open");
@@ -371,45 +379,49 @@ document.getElementById("manual-tx-submit")?.addEventListener("click", async () 
     }
 });
 
-const ocrFileInput = document.getElementById("ocr-file-input");
-const dropZoneEl   = document.getElementById("ocr-drop-zone");
+// ── CHANGE 2: OCR drop zone with retry support (no page refresh needed) ──
 
-dropZoneEl?.addEventListener("click", () => ocrFileInput?.click());
+function bindDropZoneEvents() {
+    const ocrFileInput = document.getElementById("ocr-file-input");
+    const dropZoneEl   = document.getElementById("ocr-drop-zone");
+    if (!dropZoneEl || !ocrFileInput) return;
 
-let dragCounter = 0;
+    dropZoneEl.addEventListener("click", () => ocrFileInput.click());
 
-dropZoneEl?.addEventListener("dragenter", e => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter++;
-    dropZoneEl.classList.add("drag");
-});
+    let dragCounter = 0;
 
-dropZoneEl?.addEventListener("dragover", e => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "copy";
-});
+    dropZoneEl.addEventListener("dragenter", e => {
+        e.preventDefault(); e.stopPropagation();
+        dragCounter++;
+        dropZoneEl.classList.add("drag");
+    });
 
-dropZoneEl?.addEventListener("dragleave", e => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter--;
-    if (dragCounter === 0) dropZoneEl.classList.remove("drag");
-});
+    dropZoneEl.addEventListener("dragover", e => {
+        e.preventDefault(); e.stopPropagation();
+        e.dataTransfer.dropEffect = "copy";
+    });
 
-dropZoneEl?.addEventListener("drop", e => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter = 0;
-    dropZoneEl.classList.remove("drag");
-    const file = e.dataTransfer.files[0];
-    if (file) handleOCRFile(file);
-});
+    dropZoneEl.addEventListener("dragleave", e => {
+        e.preventDefault(); e.stopPropagation();
+        dragCounter--;
+        if (dragCounter === 0) dropZoneEl.classList.remove("drag");
+    });
 
-ocrFileInput?.addEventListener("change", () => {
-    if (ocrFileInput.files[0]) handleOCRFile(ocrFileInput.files[0]);
-});
+    dropZoneEl.addEventListener("drop", e => {
+        e.preventDefault(); e.stopPropagation();
+        dragCounter = 0;
+        dropZoneEl.classList.remove("drag");
+        const file = e.dataTransfer.files[0];
+        if (file) handleOCRFile(file);
+    });
+
+    ocrFileInput.addEventListener("change", () => {
+        if (ocrFileInput.files[0]) handleOCRFile(ocrFileInput.files[0]);
+    });
+}
+
+// Bind on initial load
+bindDropZoneEvents();
 
 function resetDropZone() {
     const dropZone = document.getElementById("ocr-drop-zone");
@@ -419,19 +431,38 @@ function resetDropZone() {
         <div style="font-size:0.95rem;font-weight:600;color:#F3F4F6;margin-bottom:4px;">Drop receipt image here</div>
         <div style="font-size:0.8rem;color:#8F9CAE;">or click to browse — JPG, PNG, PDF</div>
         <input type="file" id="ocr-file-input" accept="image/*,.pdf" style="display:none;">`;
-    document.getElementById("ocr-file-input")?.addEventListener("change", () => {
-        const f = document.getElementById("ocr-file-input").files[0];
-        if (f) handleOCRFile(f);
-    });
+    // Re-bind events after rebuilding the drop zone DOM
+    bindDropZoneEvents();
 }
 
-function showOCRAlert(type, message) {
+function showOCRAlert(type, message, allowRetry = false) {
     const colors = {
         error:   { bg: "rgba(255,74,107,0.12)", border: "#FF4A6B", icon: "fa-circle-xmark",         text: "#FF4A6B" },
         warning: { bg: "rgba(255,184,0,0.10)",  border: "#FFB800", icon: "fa-triangle-exclamation",  text: "#FFB800" },
         success: { bg: "rgba(0,255,194,0.08)",  border: "#00FFC2", icon: "fa-circle-check",          text: "#00FFC2" },
     };
     const c = colors[type] || colors.warning;
+
+    // ── CHANGE 3: "Try again" is a label that re-triggers the hidden file input — no refresh ──
+    const retryHtml = allowRetry ? `
+        <div style="margin-top:10px;">
+            <label for="ocr-file-input" style="
+                display:inline-flex;
+                align-items:center;
+                gap:6px;
+                cursor:pointer;
+                font-size:0.8rem;
+                font-weight:600;
+                color:#635BFF;
+                border:1px solid #635BFF;
+                border-radius:6px;
+                padding:5px 12px;
+                transition:background 0.2s;
+            " onmouseover="this.style.background='rgba(99,91,255,0.12)'" onmouseout="this.style.background='transparent'">
+                <i class="fa-solid fa-rotate-right"></i> Try again
+            </label>
+            <input type="file" id="ocr-file-input" accept="image/*,.pdf" style="display:none;">
+        </div>` : "";
 
     const html = `
         <div style="
@@ -447,18 +478,26 @@ function showOCRAlert(type, message) {
             color:#F3F4F6;
         ">
             <i class="fa-solid ${c.icon}" style="color:${c.text};margin-top:2px;flex-shrink:0;"></i>
-            <span>${message}</span>
+            <div>
+                <span>${message}</span>
+                ${retryHtml}
+            </div>
         </div>`;
 
-    // Primary slot: inside the result box, always visible when result is shown
     const slot = document.getElementById("ocr-alert-slot");
     if (slot) {
         slot.innerHTML = html;
         slot.style.display = "block";
+        // Re-bind the new file input inside the alert if retry was injected
+        if (allowRetry) {
+            const newInput = slot.querySelector("#ocr-file-input");
+            newInput?.addEventListener("change", () => {
+                if (newInput.files[0]) handleOCRFile(newInput.files[0]);
+            });
+        }
         return;
     }
 
-    // Fallback: above the confirm button inside the pane
     const confirmEl = document.getElementById("ocr-confirm-section");
     if (confirmEl) {
         let fallback = document.getElementById("ocr-alert-banner");
@@ -470,6 +509,12 @@ function showOCRAlert(type, message) {
         }
         fallback.innerHTML = html;
         fallback.style.display = "block";
+        if (allowRetry) {
+            const newInput = fallback.querySelector("#ocr-file-input");
+            newInput?.addEventListener("change", () => {
+                if (newInput.files[0]) handleOCRFile(newInput.files[0]);
+            });
+        }
     }
 }
 
@@ -564,10 +609,12 @@ async function handleOCRFile(file) {
         const currency = extracted.currency ?? "";
         const rawDate  = extracted.date     ?? "";
 
-        let dateVal = "";
+        // ── CHANGE 1b: Default OCR date to today if none extracted ──
+        const today = getTodayISO();
+        let dateVal = today;
         if (rawDate) {
             try { dateVal = new Date(rawDate).toISOString().split("T")[0]; }
-            catch { dateVal = String(rawDate).split("T")[0]; }
+            catch { dateVal = String(rawDate).split("T")[0] || today; }
         }
 
         document.getElementById("ocr-merchant").value = merchant;
@@ -636,27 +683,31 @@ async function handleOCRFile(file) {
         if (!amount)   missingFields.push("amount");
         if (!dateVal)  missingFields.push("date");
 
+        // ── CHANGE 3: Pass allowRetry=true for error/low-confidence states ──
         if (confidence === 0 || (!merchant && !amount)) {
             showOCRAlert("error",
                 `<strong>Scan failed.</strong> No data could be extracted from this image. ` +
-                `Try a clearer photo, better lighting, or switch to a different engine. ` +
-                `You can still fill in the fields manually and save.`
+                `Try a clearer photo or better lighting. You can also fill in the fields manually below.`,
+                true  // show retry
             );
         } else if (confidence < 0.5) {
             showOCRAlert("error",
                 `<strong>Very low confidence (${confPct}%).</strong> The receipt was hard to read — ` +
                 `${missingFields.length ? `fields missing: <strong>${missingFields.join(", ")}</strong>. ` : ""}` +
-                `Please review every field carefully before saving.`
+                `Review every field carefully or upload a clearer image.`,
+                true  // show retry
             );
         } else if (confidence < 0.85) {
             showOCRAlert("warning",
                 `<strong>Low confidence (${confPct}%).</strong> Some fields may be wrong. ` +
                 `${missingFields.length ? `Missing: <strong>${missingFields.join(", ")}</strong>. ` : ""}` +
-                `Check the values below before confirming.`
+                `Check the values below or upload a clearer image.`,
+                true  // show retry
             );
         } else {
             showOCRAlert("success",
-                `Receipt scanned successfully (${confPct}% confidence). Review the fields below and confirm to save.`
+                `Receipt scanned successfully (${confPct}% confidence). Review the fields below and confirm to save.`,
+                false // no retry needed on success
             );
         }
 
@@ -679,13 +730,15 @@ async function handleOCRFile(file) {
 
         document.getElementById("ocr-merchant").value = "";
         document.getElementById("ocr-amount").value   = "";
-        document.getElementById("ocr-date").value     = "";
+        document.getElementById("ocr-date").value     = getTodayISO(); // default to today on error too
         document.getElementById("ocr-conf").textContent  = "";
         document.getElementById("ocr-engine-used").textContent = "";
 
+        // ── CHANGE 3: Always show retry on hard errors ──
         showOCRAlert("error",
             `<strong>Scan failed.</strong> ${err.message ?? "The server could not process this image."} ` +
-            `You can fill in the fields manually below and still save the expense.`
+            `You can upload a different image or fill in the fields manually below.`,
+            true  // show retry
         );
 
         console.error("[OCR] Error:", err);
