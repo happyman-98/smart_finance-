@@ -86,7 +86,7 @@ class TesseractEngine:
 class OllamaVisionEngine:
     name = "ollama"
 
-    def __init__(self, model: str = "llama3.2-vision", host: str = "http://127.0.0.1:11434"):
+    def __init__(self, model: str = "qwen2.5vl:7b", host: str = "http://127.0.0.1:11434"):
         self.model = model
         self.host = host
 
@@ -99,8 +99,8 @@ class OllamaVisionEngine:
             f"{self.host}/api/chat",
             json={
                 "model": self.model,
-                "format": Extraction.model_json_schema(), 
                 "stream": False,
+                "options": {"num_ctx": 8192},
                 "messages": [{
                     "role": "user",
                     "content": _PROMPT,
@@ -151,7 +151,7 @@ class GeminiEngine:
 class VisionLLMEngine:
     name = "vision-llm"
 
-    def __init__(self, model: str = "qwen2.5-vl", host: str = "http://127.0.0.1:11434"):
+    def __init__(self, model: str = "qwen2.5vl:7b", host: str = "http://127.0.0.1:11434"):
         self._backend = OllamaVisionEngine(model=model, host=host)
 
     def extract(self, image_path: str) -> Extraction:
