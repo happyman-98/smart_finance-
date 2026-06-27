@@ -13,6 +13,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {"status": "ok", "docs": "/docs"}
+
 app.include_router(auth.router,         prefix="/api")
 app.include_router(upload.router,       prefix="/api")
 app.include_router(transactions.router, prefix="/api")
