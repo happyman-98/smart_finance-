@@ -52,7 +52,7 @@ def run_ocr_with_retry(engine_cls, temp_path: str):
 @router.post("/upload-receipt")
 async def upload_receipt(
     file:         UploadFile = File(...),
-    engine:       str        = Form("gemini"),
+    engine:       str        = Form("tesseract"),
     db:           Session    = Depends(get_db),
     current_user: User       = Depends(get_current_user_import),
 ):

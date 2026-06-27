@@ -15,12 +15,9 @@ from PIL import Image, ImageOps
 load_dotenv()
 
 # ── API KEY ───────────────────────────────────────────────
+# Only the Gemini engine needs this. Don't fail at import time — that would take
+# down the whole upload route (and main.py) even when using Tesseract/Ollama.
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    raise EnvironmentError(
-        "GOOGLE_API_KEY is not set. Add it to your .env file as:\n"
-        "GOOGLE_API_KEY=your_key_here"
-    )
 
 
 class Conf(BaseModel):
@@ -130,6 +127,13 @@ class GeminiEngine:
 
     def __init__(self, model: str = "gemini-2.0-flash"):   #gemini-2.0-flash
         self.model = model
+        if not GOOGLE_API_KEY:
+            raise EnvironmentError(
+                "GOOGLE_API_KEY is not set. Add it to your .env file as:\n"
+                "GOOGLE_API_KEY=your_key_here\n"
+                "(a valid Gemini key starts with 'AIza'), or use the "
+                "Tesseract engine instead."
+            )
         # Explicitly pass the API key so it works regardless of
         # whether the environment variable is auto-detected
         self.client = genai.Client(api_key=GOOGLE_API_KEY)

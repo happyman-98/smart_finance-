@@ -516,7 +516,7 @@ async function handleOCRFile(file) {
     }, 300);
 
     try {
-        const engine   = document.querySelector(".eng-btn.sel")?.dataset.engine ?? "gemini";
+        const engine   = document.querySelector(".eng-btn.sel")?.dataset.engine ?? "tesseract";
         const formData = new FormData();
         formData.append("file", file);
         formData.append("engine", engine);
