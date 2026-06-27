@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceOS | Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand-wrapper">
+                <div class="brand-logo"><i class="fa-solid fa-infinity"></i></div>
+                <div class="brand-text">FinanceOS</div>
+            </div>
+            <nav class="nav-group">
+                <div class="menu-label">Main Scope</div>
+                <div class="nav-item active" data-target="overview-view">
+                    <i class="fa-solid fa-chart-pie"></i>Overview
+                </div>
+                <div class="nav-item" data-target="accounts-view">
+                    <i class="fa-solid fa-wallet"></i>My Accounts
+                </div>
+                <div class="nav-item" data-target="transactions-view">
+                    <i class="fa-solid fa-receipt"></i>Transactions
+                </div>
+                <div class="nav-item" data-target="categories-view">
+                    <i class="fa-solid fa-tags"></i>Categories
+                </div>
+                <div class="nav-item" data-target="goals-view">
+                    <i class="fa-solid fa-bullseye"></i>Goals Tracker
+                </div>
+            </nav>
+        </div>
+        <div class="sidebar-footer">
+            <div class="nav-item" data-target="settings-view">
+                <i class="fa-solid fa-sliders"></i>Settings
+            </div>
+            <div class="nav-item" id="logout-trigger" style="color:#FF4A6B;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── MAIN WORKSPACE ── -->
+    <main class="app-workspace">
+
+        <header class="app-header">
+            <div class="view-title" id="dynamic-title">Dashboard Overview</div>
+            <div class="header-actions">
+                <!-- ① Add Transaction button — visible everywhere -->
+                <button class="add-tx-header-btn" id="add-tx-btn">
+                    <i class="fa-solid fa-plus"></i> Add Transaction
+                </button>
+                <div class="live-clock" id="clock-display">00:00:00 AM</div>
+                <div class="user-pill">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><circle cx='12' cy='8' r='4'/><path d='M12 14c-6.1 0-8 4-8 4v2h16v-2s-1.9-4-8-4z'/></svg>" alt="User">
+                    <span style="font-size:0.85rem;font-weight:500;" id="header-username"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── OVERVIEW ── -->
+        <section id="overview-view" class="view-frame active-view">
+            <div class="metrics-shelf">
+                <div class="metric-card accent-mint">
+                    <div class="metric-label">Net Available Balance</div>
+                    <div class="metric-value" id="live-net-balance">—</div>
+                    <div class="metric-sub trend-up"><i class="fa-solid fa-caret-up"></i> Live from transactions</div>
+                </div>
+                <div class="metric-card accent-purple">
+                    <div class="metric-label">Monthly Income</div>
+                    <div class="metric-value" id="metric-income">—</div>
+                    <div class="metric-sub trend-up"><i class="fa-solid fa-caret-up"></i> Set in Settings</div>
+                </div>
+                <div class="metric-card accent-rose">
+                    <div class="metric-label">Monthly Savings Goal</div>
+                    <div class="metric-value" id="metric-savings-goal">—</div>
+                    <div class="metric-sub trend-up"><i class="fa-solid fa-caret-up"></i> Set in Settings</div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout-grid">
+                <div class="card-panel">
+                    <div class="panel-header"><div class="panel-title">Income &amp; Expense Flow</div></div>
+                    <div class="chart-box"><canvas id="overviewFlowChart"></canvas></div>
+                </div>
+                <div class="card-panel">
+                    <div class="panel-header"><div class="panel-title">Quick Actions</div></div>
+                    <p style="font-size:0.85rem;color:#8F9CAE;line-height:1.4;">Simulate a deposit or add a new transaction.</p>
+                    <div class="interactive-form-box">
+                        <label style="font-size:0.8rem;font-weight:600;color:#00FFC2;">Simulate Deposit</label>
+                        <input type="number" id="deposit-input-amount" class="input-element" placeholder="Enter amount ($)">
+                        <button class="action-submit-btn" id="simulate-deposit-btn">Process Deposit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── ACCOUNTS ── -->
+        <section id="accounts-view" class="view-frame">
+            <div class="card-panel" style="margin-bottom:24px;">
+                <h3>Connected Accounts</h3>
+                <p style="color:#8F9CAE;margin-top:4px;font-size:0.9rem;">Linked bank accounts — pulled from your profile.</p>
+            </div>
+            <div class="data-feed" id="accounts-feed">
+                <p style="color:#8F9CAE;text-align:center;padding:20px;">
+                    <i class="fa-solid fa-info-circle" style="margin-right:6px;"></i>
+                    Account syncing requires a bank connection integration (Plaid, etc.).
+                    Showing demo data.
+                </p>
+                <div class="feed-row">
+                    <div class="row-meta">
+                        <div class="row-icon bg-mint-dim"><i class="fa-solid fa-building-columns"></i></div>
+                        <div>
+                            <div class="row-title">Primary Checking</div>
+                            <div class="row-sub">Chase Bank •••• 9821</div>
+                        </div>
+                    </div>
+                    <div class="row-amt">$18,450.00</div>
+                </div>
+                <div class="feed-row">
+                    <div class="row-meta">
+                        <div class="row-icon bg-mint-dim"><i class="fa-solid fa-vault"></i></div>
+                        <div>
+                            <div class="row-title">High Yield Savings</div>
+                            <div class="row-sub">Goldman Sachs •••• 4412</div>
+                        </div>
+                    </div>
+                    <div class="row-amt">$5,112.00</div>
+                </div>
+            </div>
+            <div class="card-panel" style="margin-top:24px;">
+                <p style="font-size:0.85rem;color:#8F9CAE;">
+                    <i class="fa-solid fa-plug" style="color:#635BFF;margin-right:8px;"></i>
+                    To connect real accounts, integrate a bank data API such as Plaid or MX and expose
+                    <code style="background:#0B0C10;padding:2px 6px;border-radius:4px;font-size:0.8rem;">/api/accounts/</code> on the backend.
+                </p>
+            </div>
+        </section>
+
+        <!-- ── TRANSACTIONS ── -->
+        <section id="transactions-view" class="view-frame">
+            <!-- ② Filter bar -->
+            <div class="card-panel" style="margin-bottom:20px;">
+                <div class="filter-bar">
+                    <select id="filter-type" class="input-element filter-el">
+                        <option value="">All types</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                    <input type="text" id="filter-category" class="input-element filter-el" placeholder="Filter by category…">
+                    <input type="date" id="filter-from" class="input-element filter-el" title="From date">
+                    <input type="date" id="filter-to"   class="input-element filter-el" title="To date">
+                    <button id="filter-reset" class="filter-reset-btn">
+                        <i class="fa-solid fa-xmark"></i> Reset
+                    </button>
+                </div>
+            </div>
+            <div class="panel-header" style="margin-bottom:16px;">
+                <h3>Transaction History</h3>
+            </div>
+            <div class="data-feed" id="master-transaction-ledger">
+                <p style="color:#8F9CAE;text-align:center;padding:20px;">Loading transactions…</p>
+            </div>
+        </section>
+
+        <!-- ── CATEGORIES ── -->
+        <section id="categories-view" class="view-frame">
+            <div class="dashboard-layout-grid">
+                <div class="card-panel">
+                    <h3>Spending by Category</h3>
+                    <div class="chart-box" style="margin-top:20px;">
+                        <canvas id="categoryDistributionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-panel">
+                    <h3>Category Budgets</h3>
+                    <p style="color:#8F9CAE;font-size:0.85rem;line-height:1.4;margin-top:10px;">
+                        Set monthly spending limits per category. Coming soon.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── GOALS ── -->
+        <section id="goals-view" class="view-frame">
+            <h3>Savings Goals</h3>
+            <!-- ③ Goals rendered by JS — includes contribution inputs + Add New Goal form -->
+            <div id="goals-container" style="margin-top:20px;">
+                <p style="color:#8F9CAE;text-align:center;padding:20px;">Loading goals…</p>
+            </div>
+        </section>
+
+        <!-- ── SETTINGS ── -->
+        <section id="settings-view" class="view-frame">
+            <h3>Settings</h3>
+
+            <div class="card-panel" style="margin-top:20px;margin-bottom:24px;">
+                <p style="font-size:0.95rem;margin-bottom:15px;">
+                    <i class="fa-solid fa-shield-halved" style="color:#00FFC2;margin-right:8px;"></i>
+                    Two-Factor Auth: <span style="color:#00FFC2;font-weight:700;">ACTIVE</span>
+                </p>
+                <p style="font-size:0.95rem;">
+                    <i class="fa-solid fa-server" style="color:#635BFF;margin-right:8px;"></i>
+                    API Endpoint: <span style="color:#8F9CAE;">http://localhost:8000</span>
+                </p>
+            </div>
+
+            <!-- ④ Full profile fields -->
+            <div class="card-panel" style="margin-bottom:24px;">
+                <h4 style="margin-bottom:18px;color:#00FFC2;">
+                    <i class="fa-solid fa-user-pen" style="margin-right:8px;"></i>Profile Information
+                </h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div>
+                        <label class="settings-label">Full Name</label>
+                        <input type="text" id="settings-name" class="input-element" placeholder="Your name">
+                    </div>
+                    <div>
+                        <label class="settings-label">Email</label>
+                        <input type="email" id="settings-email" class="input-element" placeholder="you@email.com" disabled style="opacity:0.5;cursor:not-allowed;" title="Email cannot be changed">
+                    </div>
+                    <div>
+                        <label class="settings-label">Phone</label>
+                        <input type="tel" id="settings-phone" class="input-element" placeholder="+1 555 000 0000">
+                    </div>
+                    <div>
+                        <label class="settings-label">Date of Birth</label>
+                        <input type="date" id="settings-dob" class="input-element">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel">
+                <h4 style="margin-bottom:18px;color:#00FFC2;">
+                    <i class="fa-solid fa-sliders" style="margin-right:8px;"></i>Financial Profile
+                </h4>
+                <div style="display:grid;gap:16px;">
+                    <div>
+                        <label class="settings-label">Monthly Income ($)</label>
+                        <input type="number" id="settings-monthly-income" class="input-element" placeholder="e.g. 5000" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label class="settings-label">Monthly Savings Goal ($)</label>
+                        <input type="number" id="settings-savings-goal" class="input-element" placeholder="e.g. 1000" min="0" step="0.01">
+                    </div>
+                    <button class="action-submit-btn" id="settings-save-btn">Save Changes</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ── ADD TRANSACTION DRAWER (slide-over) ── -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="add-tx-drawer" id="add-tx-drawer">
+        <div class="drawer-header">
+            <div style="font-size:1rem;font-weight:600;">Add Transaction</div>
+            <button class="drawer-close-btn" id="drawer-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Drawer tabs -->
+        <div class="drawer-tab-row">
+            <div class="drawer-tab active" id="tx-tab-manual" data-pane="drawer-pane-manual">
+                <i class="fa-solid fa-keyboard"></i> Manual
+            </div>
+            <div class="drawer-tab" data-pane="drawer-pane-ocr">
+                <i class="fa-solid fa-camera"></i> Scan Receipt
+            </div>
+        </div>
+
+        <!-- MANUAL PANE -->
+        <div class="drawer-pane active" id="drawer-pane-manual">
+            <div class="drawer-field">
+                <label class="settings-label">Transaction Type</label>
+                <div class="type-toggle">
+                    <div class="type-btn sel-expense" data-type="expense">
+                        <i class="fa-solid fa-arrow-trend-down"></i> Expense
+                    </div>
+                    <div class="type-btn" data-type="income">
+                        <i class="fa-solid fa-arrow-trend-up"></i> Income
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="drawer-field">
+                    <label class="settings-label">Amount ($)</label>
+                    <input type="number" id="tx-amount" class="input-element" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="drawer-field">
+                    <label class="settings-label">Date</label>
+                    <input type="date" id="tx-date" class="input-element">
+                </div>
+            </div>
+            <div class="drawer-field">
+                <label class="settings-label">Merchant / Description</label>
+                <input type="text" id="tx-merchant" class="input-element" placeholder="e.g. Whole Foods, Netflix…">
+            </div>
+            <div class="drawer-field">
+                <label class="settings-label">Category</label>
+                <div class="cat-grid">
+                    <div class="cat-chip sel">🛒 Groceries</div>
+                    <div class="cat-chip">🍔 Dining</div>
+                    <div class="cat-chip">🚗 Transport</div>
+                    <div class="cat-chip">🏠 Housing</div>
+                    <div class="cat-chip">💊 Health</div>
+                    <div class="cat-chip">🎬 Entertainment</div>
+                    <div class="cat-chip">🛍️ Shopping</div>
+                    <div class="cat-chip">💼 Income</div>
+                </div>
+            </div>
+            <button class="action-submit-btn" id="manual-tx-submit" style="width:100%;margin-top:8px;">
+                Save Transaction
+            </button>
+        </div>
+
+        <!-- OCR PANE -->
+        <div class="drawer-pane" id="drawer-pane-ocr">
+            <div class="drop-zone" id="ocr-drop-zone">
+                <i class="fa-solid fa-file-image" style="font-size:2rem;color:#635BFF;display:block;margin-bottom:10px;"></i>
+                <div style="font-size:0.95rem;font-weight:600;color:#F3F4F6;margin-bottom:4px;">Drop receipt image here</div>
+                <div style="font-size:0.8rem;color:#8F9CAE;">or click to browse — JPG, PNG, PDF</div>
+                <input type="file" id="ocr-file-input" accept="image/*,.pdf" style="display:none;">
+            </div>
+
+            <div class="drawer-field" style="margin-top:14px;">
+                <label class="settings-label">Extraction Engine</label>
+                <div class="engine-row">
+                    <div class="eng-btn sel" data-engine="gemini">✦ Gemini</div>
+                    <div class="eng-btn" data-engine="ollama">⚙ Ollama</div>
+                    <div class="eng-btn" data-engine="tesseract">📄 Tesseract</div>
+                </div>
+            </div>
+
+            <div class="ocr-progress-wrap" id="ocr-progress" style="display:none;margin-top:12px;">
+                <div style="font-size:0.75rem;color:#8F9CAE;margin-bottom:6px;">Extracting…</div>
+                <div style="background:#1E2330;border-radius:4px;height:4px;overflow:hidden;">
+                    <div id="ocr-progress-fill" style="height:100%;background:linear-gradient(90deg,#635BFF,#00FFC2);width:0%;transition:width 0.3s;"></div>
+                </div>
+            </div>
+
+           <div id="ocr-result-box" style="display:none;margin-top:14px;background:#0B0C10;border:1px solid #1E2330;border-radius:10px;padding:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:0.85rem;font-weight:600;">Extracted fields</span>
+        <span id="ocr-conf" style="font-size:0.75rem;font-weight:700;"></span>
+    </div>
+    <div style="font-size:0.72rem;color:#8F9CAE;margin-bottom:10px;" id="ocr-engine-used"></div>
+    <div style="display:grid;gap:8px;">
+        <div>
+            <label class="settings-label">Merchant</label>
+            <input type="text" id="ocr-merchant" class="input-element">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+                <label class="settings-label">Total ($)</label>
+                <input type="number" id="ocr-amount" class="input-element" step="0.01">
+            </div>
+            <div>
+                <label class="settings-label">Date</label>
+                <input type="date" id="ocr-date" class="input-element">
+            </div>
+        </div>
+    </div>
+    <div id="ocr-alert-slot" style="display:none;margin-top:12px;"></div>
+</div>
+
+            <div id="ocr-confirm-section" style="display:none;margin-top:12px;">
+                <button class="action-submit-btn" id="ocr-confirm-btn" style="width:100%;">
+                    Confirm &amp; Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CHATBOT ── -->
+    <div class="chat-widget-trigger" id="chatbot-button">
+        <div class="chat-alert-bubble">Talk with SmartAssist</div>
+        <div class="chat-bot-icon"><i class="fa-solid fa-robot"></i></div>
+    </div>
+
+    <div class="chat-window-box" id="chatbot-window">
+        <div class="chat-window-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="chat-status-avatar">
+                    <i class="fa-solid fa-robot"></i>
+                    <span class="status-indicator-dot"></span>
+                </div>
+                <div>
+                    <h4 style="margin:0;font-size:0.95rem;">SmartAssist AI</h4>
+                    <span style="font-size:0.75rem;color:#00FFC2;">Online &amp; Ready</span>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <!-- ⑤ Chat reset button -->
+                <button id="chat-reset-btn" title="Clear chat history" style="background:none;border:none;color:#8F9CAE;cursor:pointer;font-size:0.85rem;padding:4px 8px;border-radius:6px;border:1px solid #1E2330;transition:all 0.2s;">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button class="chat-close-btn" id="close-chatbot">&times;</button>
+            </div>
+        </div>
+        <div class="chat-messages-body" id="chat-messages-container">
+            <div class="msg-bubble bot-msg">
+                Hi! I'm your SmartAssist. Try asking:<br>
+                • <strong>"What is my balance?"</strong><br>
+                • <strong>"Give me a budget tip"</strong>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-user-input" placeholder="Ask a financial question…">
+            <button id="chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- ── TOAST ── -->
+    <div class="toast-banner" id="global-toast-widget">Action completed.</div>
+
+    <script src="dashboard.js"></script>
+    <script>
+        // Set today's date on the manual transaction date input
+        document.getElementById("tx-date").value = new Date().toISOString().split("T")[0];
+    </script>
+</body>
+</html>

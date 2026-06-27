@@ -1,8 +1,9 @@
-from sqlalchemy import Column, ForeignKey, Integer, Float, String, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, Float, String, DateTime, Date
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel,EmailStr
-from datetime import datetime, timezone
+from datetime import datetime, timezone,date
 from models.database import Base
+
 
 # ─── DB Tables ───────────────────────────────────────────
 
@@ -13,6 +14,9 @@ class User(Base):
     email      = Column(String, unique=True, nullable=False, index=True)
     password   = Column(String, nullable=False)   # hashed, never plain text
     phone      = Column(String, nullable=True)     # for SMS alerts
+    dob                  = Column(Date, nullable=True)
+    monthly_income       = Column(Float, nullable=True)
+    monthly_savings_goal = Column(Float, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships — one user has many transactions and goals
@@ -48,13 +52,19 @@ class UserCreate(BaseModel):
     email:    EmailStr
     password: str
     phone:    str | None = None
+    dob:           date | None = None          # date of birth from the 3 dropdowns
+    monthly_income:     float | None = None   # "Monthly income / salary"
+    monthly_savings_goal: float | None = None 
 
 class UserOut(BaseModel):
-    id:         int
-    name:       str
-    email:      str
-    phone:      str | None
-    created_at: datetime
+    id:                   int
+    name:                 str
+    email:                str
+    phone:                str | None
+    dob:                  date | None
+    monthly_income:       float | None
+    monthly_savings_goal: float | None
+    created_at:           datetime
     class Config:
         from_attributes = True
 

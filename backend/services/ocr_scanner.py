@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import pytesseract
 import requests  
@@ -12,6 +13,15 @@ from dotenv import load_dotenv
 from PIL import Image, ImageOps
 
 load_dotenv()
+
+# ── API KEY ───────────────────────────────────────────────
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    raise EnvironmentError(
+        "GOOGLE_API_KEY is not set. Add it to your .env file as:\n"
+        "GOOGLE_API_KEY=your_key_here"
+    )
+
 
 class Conf(BaseModel):
     value: float | str | int | None = None
@@ -118,18 +128,19 @@ class OllamaVisionEngine:
 class GeminiEngine:
     name = "gemini"
 
-    def __init__(self, model: str = "gemini-2.5-flash"):
+    def __init__(self, model: str = "gemini-2.0-flash"):   #gemini-2.0-flash
         self.model = model
+        # Explicitly pass the API key so it works regardless of
+        # whether the environment variable is auto-detected
+        self.client = genai.Client(api_key=GOOGLE_API_KEY)
 
     def extract(self, image_path: str) -> Extraction:
-        
 
         media_type = mimetypes.guess_type(image_path)[0] or "image/jpeg"
         with open(image_path, "rb") as f:
             img_bytes = f.read()
 
-        client = genai.Client() 
-        resp = client.models.generate_content(
+        resp = self.client.models.generate_content(
             model=self.model,
             contents=[
                 types.Part.from_bytes(data=img_bytes, mime_type=media_type),

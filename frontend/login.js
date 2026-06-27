@@ -114,11 +114,128 @@ function buildCustomSelect(wrapperId, items) {
 
   var years = [];
   var currentYear = new Date().getFullYear();
-  var maxYear = currentYear - 13;  // minimum age: 13
-  var minYear = currentYear - 100; // maximum age: 100
+  var maxYear = currentYear - 13;
+  var minYear = currentYear - 100;
   for (var y = maxYear; y >= minYear; y--) years.push({ value: y, label: String(y) });
 
   buildCustomSelect('su-dob-month', months);
   buildCustomSelect('su-dob-day', days);
   buildCustomSelect('su-dob-year', years);
 })();
+
+/* ══════════════════════════════════════════════════════════
+   API / FETCH SECTION
+══════════════════════════════════════════════════════════ */
+
+const API = "http://localhost:8000";
+
+/* ── Helper: show inline error ── */
+function showError(msg) {
+  let el = document.getElementById("form-error");
+  if (!el) {
+    el = document.createElement("p");
+    el.id = "form-error";
+    el.style.cssText = "color:#ff4d4d;font-size:13px;text-align:center;margin:8px 0 0;";
+  }
+  el.textContent = msg;
+  const activePanel = currentTab === "signin" ? panSignin : panSignup;
+  const btn = activePanel.querySelector(".btn-primary");
+  activePanel.insertBefore(el, btn);
+}
+
+function clearError() {
+  const el = document.getElementById("form-error");
+  if (el) el.remove();
+}
+
+/* ── Helper: get DOB from custom selects ── */
+function getDOB() {
+  const m = document.querySelector("#su-dob-month .custom-select-trigger").dataset.value;
+  const d = document.querySelector("#su-dob-day .custom-select-trigger").dataset.value;
+  const y = document.querySelector("#su-dob-year .custom-select-trigger").dataset.value;
+  if (!m || !d || !y) return null;
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
+/* ── LOGIN ── */
+panSignin.querySelector(".btn-primary").addEventListener("click", async function () {
+  clearError();
+  const email    = document.getElementById("si-email").value.trim();
+  const password = document.getElementById("si-password").value;
+
+  if (!email || !password) return showError("Please fill in all fields.");
+
+  this.textContent = "LOGGING IN...";
+  this.disabled = true;
+
+  try {
+    const res  = await fetch(`${API}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(data.detail || "Login failed.");
+    } else {
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user",  JSON.stringify(data.user));
+      window.location.href = "dashboard.html";
+    }
+  } catch (err) {
+    showError("Network error. Is the server running?");
+  } finally {
+    this.textContent = "LOGIN";
+    this.disabled = false;
+  }
+});
+
+/* ── REGISTER ── */
+panSignup.querySelector(".btn-primary").addEventListener("click", async function () {
+  clearError();
+
+  const name     = document.getElementById("su-name").value.trim();
+  const email    = document.getElementById("su-email").value.trim();
+  const phone    = document.getElementById("su-mobile").value.trim() || null;
+  const password = document.getElementById("su-password").value;
+  const income   = parseFloat(document.getElementById("su-income").value) || null;
+  const savings  = parseFloat(document.getElementById("su-savings-goal").value) || null;
+  const dob      = getDOB();
+
+  if (!name || !email || !password) return showError("Name, email and password are required.");
+  if (password.length < 6)          return showError("Password must be at least 6 characters.");
+
+  this.textContent = "CREATING...";
+  this.disabled = true;
+
+  try {
+    const res  = await fetch(`${API}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        phone,
+        dob,
+        monthly_income:       income,
+        monthly_savings_goal: savings
+      })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(data.detail || "Registration failed.");
+    } else {
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user",  JSON.stringify(data.user));
+      window.location.href = "dashboard.html";
+    }
+  } catch (err) {
+    showError("Network error. Is the server running?");
+  } finally {
+    this.textContent = "CREATE ACCOUNT";
+    this.disabled = false;
+  }
+});
